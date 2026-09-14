@@ -9,10 +9,14 @@ TIMEOUT = aiohttp.ClientTimeout(total=25)
 
 
 async def request_code(telegram_id, first_name='', last_name='', username='',
-                       phone='', photo=None):
+                       phone='', age=None, photo=None):
     """Foydalanuvchi ma'lumotlarini yuborib, kirish kodini oladi.
 
-    Qaytaradi: (muvaffaqiyatlimi, javob_dict)
+    Raqam faqat birinchi marta kerak — keyin sayt odamni telegram_id bo'yicha taniydi.
+
+    Qaytaradi: (muvaffaqiyatlimi, javob_dict). Kod berilmasa javobdagi
+    `error` bot nima qilishini aytadi: `need_phone`, `need_age`,
+    `age_limit`, `bad_age`.
     """
     url = config.SITE_URL.rstrip('/') + CODE_PATH
     headers = {'X-Bot-Secret': config.API_SECRET}
@@ -23,6 +27,8 @@ async def request_code(telegram_id, first_name='', last_name='', username='',
     form.add_field('last_name', last_name)
     form.add_field('username', username)
     form.add_field('phone', phone)
+    if age is not None:
+        form.add_field('age', str(age))
 
     if photo:
         form.add_field('photo', photo, filename=f'{telegram_id}.jpg',
