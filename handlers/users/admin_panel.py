@@ -281,7 +281,7 @@ async def got_ad_content(message: types.Message, state: FSMContext):
     await message.answer(
         "Tugma qo'shasizmi?\n\n"
         "Har bir qatorga shunday yozing:\n"
-        "<code>Batafsil | https://mentadbirkor.uz</code>\n\n"
+        "<code>Batafsil | https://samarqandyoshlari.uz</code>\n\n"
         "Tugmasiz yuborish — /otkazish")
 
 
@@ -303,7 +303,7 @@ async def got_buttons(message: types.Message, state: FSMContext):
 
     if not buttons:
         await message.answer("Tugma topilmadi. Namuna:\n"
-                             "<code>Batafsil | https://mentadbirkor.uz</code>\n\n"
+                             "<code>Batafsil | https://samarqandyoshlari.uz</code>\n\n"
                              "Tugmasiz yuborish — /otkazish")
         return
 

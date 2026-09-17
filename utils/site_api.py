@@ -16,6 +16,7 @@ STATS_PATH = "/api/telegram/statistika/"
 CHANNELS_PATH = "/api/telegram/kanallar/"
 JOINS_PATH = "/api/telegram/obuna/"
 USERS_PATH = "/api/telegram/foydalanuvchilar/"
+POSTS_PATH = "/api/telegram/postlar/"
 BROADCAST_PATH = "/api/telegram/reklama/"
 
 
@@ -134,6 +135,17 @@ async def record_joins(telegram_id, chat_ids):
 async def get_user_ids():
     ok, payload = await _request('GET', USERS_PATH)
     return payload.get('ids', []) if ok else []
+
+
+async def get_posts():
+    """Saytga qo'shilgan, hali yuborilmagan yangiliklar."""
+    ok, payload = await _request('GET', POSTS_PATH)
+    return payload.get('results', []) if ok else []
+
+
+async def post_result(post_id, total, sent, failed):
+    return await _request('POST', f"{POSTS_PATH}{post_id}/natija/",
+                          json={'total': total, 'sent': sent, 'failed': failed})
 
 
 async def start_broadcast(text='', kind='text', file_id='', buttons=None, total=0,
