@@ -1,6 +1,7 @@
 """Saytga kirish uchun kod berish.
 
-Oqim: majburiy kanallarga obuna → raqam (birinchi marta) → yosh → kod.
+Oqim: majburiy kanallarga obuna → raqam (birinchi marta) → yosh →
+tuman (Samarqand viloyati) → kod.
 Keyingi safar /start bosilsa kod darrov beriladi.
 """
 
@@ -12,6 +13,7 @@ from aiogram.dispatcher.filters.builtin import CommandStart
 from aiogram.utils.exceptions import TelegramAPIError
 
 from keyboards.inline.admin import subscribe_menu
+from keyboards.inline.auth import districts_menu
 from loader import bot, dp
 from states.auth import AuthState
 from utils import site_api
@@ -148,6 +150,30 @@ async def got_age(message: types.Message, state: FSMContext):
     await respond(message.chat.id, ok, response)
 
 
+@dp.callback_query_handler(lambda call: call.data.startswith('tuman:'),
+                           state=AuthState.waiting_district)
+async def got_district(call: types.CallbackQuery, state: FSMContext):
+    district = call.data.split(':', 1)[1]
+
+    await call.answer()
+    await call.message.edit_reply_markup()
+    await state.finish()
+
+    ok, response = await site_api.request_code(**user_fields(call.from_user),
+                                               district=district)
+    await respond(call.message.chat.id, ok, response)
+
+
+@dp.message_handler(lambda message: not (message.text or '').startswith('/'),
+                    state=AuthState.waiting_district)
+async def remind_district(message: types.Message, state: FSMContext):
+    """Yozib yuborsa ham qabul qilamiz — nomi to'g'ri bo'lsa."""
+    ok, response = await site_api.request_code(**user_fields(message.from_user),
+                                               district=(message.text or '').strip())
+    await state.finish()
+    await respond(message.chat.id, ok, response)
+
+
 @dp.message_handler(state=AuthState.waiting_contact)
 async def remind_contact(message: types.Message):
     await message.answer("Pastdagi tugmani bosing 👇", reply_markup=contact_keyboard())
@@ -184,6 +210,21 @@ async def respond(chat_id, ok: bool, response: dict):
     elif error == 'bad_age':
         await AuthState.waiting_age.set()
         await bot.send_message(chat_id, "Yoshni to'g'ri yozing (7 dan 100 gacha). Masalan: <b>21</b>")
+    elif error == 'need_district':
+        await AuthState.waiting_district.set()
+        await bot.send_message(
+            chat_id,
+            "Yaxshi! Endi <b>Samarqand viloyatining</b> qaysi tuman yoki "
+            "shahridanligingizni tanlang 👇",
+            reply_markup=districts_menu(response.get('districts')),
+        )
+    elif error == 'bad_district':
+        await AuthState.waiting_district.set()
+        await bot.send_message(
+            chat_id,
+            "Bunday tuman topilmadi. Pastdagi ro'yxatdan tanlang 👇",
+            reply_markup=districts_menu(response.get('districts')),
+        )
     elif error == 'age_limit':
         limit = response.get('limit', 30)
         await AuthState.waiting_age.set()

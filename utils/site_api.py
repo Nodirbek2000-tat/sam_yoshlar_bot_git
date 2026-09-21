@@ -50,14 +50,14 @@ async def _request(method, path, *, params=None, json=None):
 # --------------------------------------------------------------------------
 
 async def request_code(telegram_id, first_name='', last_name='', username='',
-                       phone='', age=None, photo=None):
+                       phone='', age=None, district='', photo=None):
     """Foydalanuvchi ma'lumotlarini yuborib, kirish kodini oladi.
 
     Raqam faqat birinchi marta kerak — keyin sayt odamni telegram_id bo'yicha taniydi.
 
     Qaytaradi: (muvaffaqiyatlimi, javob_dict). Kod berilmasa javobdagi
     `error` bot nima qilishini aytadi: `need_phone`, `need_age`,
-    `age_limit`, `bad_age`.
+    `age_limit`, `bad_age`, `need_district`, `bad_district`.
     """
     form = aiohttp.FormData()
     form.add_field('telegram_id', str(telegram_id))
@@ -67,6 +67,8 @@ async def request_code(telegram_id, first_name='', last_name='', username='',
     form.add_field('phone', phone)
     if age is not None:
         form.add_field('age', str(age))
+    if district:
+        form.add_field('district', str(district))
 
     if photo:
         form.add_field('photo', photo, filename=f'{telegram_id}.jpg',
@@ -133,8 +135,11 @@ async def record_joins(telegram_id, chat_ids):
 # --------------------------------------------------------------------------
 
 async def get_user_ids():
+    """Faqat odamlar: guruh va kanal ID lari (manfiy) chetda qoladi."""
     ok, payload = await _request('GET', USERS_PATH)
-    return payload.get('ids', []) if ok else []
+    if not ok:
+        return []
+    return [int(item) for item in payload.get('ids', []) if int(item) > 0]
 
 
 async def get_posts():
