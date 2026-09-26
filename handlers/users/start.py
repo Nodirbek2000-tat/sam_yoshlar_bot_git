@@ -226,7 +226,7 @@ async def respond(chat_id, ok: bool, response: dict):
             reply_markup=districts_menu(response.get('districts')),
         )
     elif error == 'age_limit':
-        limit = response.get('limit', 30)
+        limit = response.get('limit', 34)
         await AuthState.waiting_age.set()
         await bot.send_message(
             chat_id,

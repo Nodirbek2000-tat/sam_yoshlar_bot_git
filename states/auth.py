@@ -7,3 +7,9 @@ class AuthState(StatesGroup):
     waiting_contact = State()
     waiting_age = State()
     waiting_district = State()
+
+
+class OrgLinkState(StatesGroup):
+    """Tashkilot Telegram'ini ulash: maxsus havola → raqam."""
+
+    waiting_contact = State()

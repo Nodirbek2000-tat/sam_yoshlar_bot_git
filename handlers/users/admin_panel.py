@@ -94,6 +94,16 @@ async def show_stats(call: types.CallbackQuery):
         f"• Bugun: {users['today']} · Haftada: {users['week']}",
         f"• Yosh: {users['youth']} · Tadbirkor: {users['entrepreneurs']} · "
         f"Startupper: {users['startuppers']}",
+    ]
+
+    # Tashkilotlar foydalanuvchi sifatida sanalmaydi — alohida qator
+    organizations = data.get('organizations')
+    if organizations:
+        lines += ["", "<b>Tashkilotlar</b>",
+                  f"• Jami: {organizations['total']} · "
+                  f"Telegram ulangan: {organizations['telegram']}"]
+
+    lines += [
         "",
         "<b>Sayt</b>",
         f"• Tashabbus: {site['initiatives']} · Ovoz: {site['votes']}",

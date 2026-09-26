@@ -11,6 +11,7 @@ from data import config
 TIMEOUT = aiohttp.ClientTimeout(total=25)
 
 CODE_PATH = "/api/telegram/kod/"
+ORG_LINK_PATH = "/api/telegram/tashkilot/"
 ADMIN_PATH = "/api/telegram/admin/"
 STATS_PATH = "/api/telegram/statistika/"
 CHANNELS_PATH = "/api/telegram/kanallar/"
@@ -86,6 +87,20 @@ async def request_code(telegram_id, first_name='', last_name='', username='',
         return False, {'error': 'tarmoq', 'detail': str(error)}
     except Exception as error:            # noqa: BLE001
         return False, {'error': 'nomalum', 'detail': str(error)}
+
+
+async def org_link(token, user, phone=''):
+    """Tashkilot Telegram'ini ulash (``/start org_<token>``).
+
+    Raqamsiz chaqirilsa — tashkilot tanilib ``need_phone`` qaytadi;
+    raqam bilan — Telegram tashkilotga ulanadi.
+    """
+    return await _request('POST', ORG_LINK_PATH, json={
+        'token': token,
+        'telegram_id': user.id,
+        'username': user.username or '',
+        'phone': phone,
+    })
 
 
 # --------------------------------------------------------------------------
