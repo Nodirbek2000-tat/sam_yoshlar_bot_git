@@ -12,6 +12,8 @@ import asyncio
 import logging
 
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+
+from data import config
 from aiogram.utils.exceptions import (BotBlocked, ChatNotFound, RetryAfter,
                                       TelegramAPIError, UserDeactivated)
 
@@ -93,6 +95,36 @@ async def send_post(post, user_ids):
     logger.info("Yangilik yuborildi: %s -> %s/%s", post['title'], sent, len(user_ids))
 
 
+def escape(text):
+    return str(text or '').replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+
+
+async def report_errors():
+    """Serverda xato chiqsa — `.env` dagi ADMINS ga darhol xabar."""
+    errors, panel = await site_api.get_errors()
+
+    for error in errors:
+        head = "🔁 Xato yana takrorlandi" if error.get('repeat') else "⚠️ Serverda yangi xato"
+        lines = [
+            f"<b>{head}</b>",
+            "",
+            f"<code>{escape(error['title'])[:300]}</code>",
+            f"📍 {escape(error.get('location') or '—')}",
+            f"🌐 {escape(error.get('method'))} {escape(error.get('path'))[:200]}",
+            f"🔢 Jami: {error.get('count', 1)} marta",
+        ]
+        markup = None
+        if panel.startswith('https://'):
+            markup = InlineKeyboardMarkup().add(
+                InlineKeyboardButton("🛠 Panelda ko'rish", url=panel))
+
+        for admin in config.ADMINS:
+            try:
+                await bot.send_message(admin, "\n".join(lines), reply_markup=markup)
+            except TelegramAPIError as problem:
+                logger.warning("Adminga xato haqida yozib bo'lmadi (%s): %s", admin, problem)
+
+
 async def watch_site():
     """Doimiy sikl — bot ishlab turganda fonda yuradi."""
     while True:
@@ -104,5 +136,10 @@ async def watch_site():
                     await send_post(post, user_ids)
         except Exception as error:            # noqa: BLE001
             logger.warning("Yangiliklarni yuborishda xato: %s", error)
+
+        try:
+            await report_errors()
+        except Exception as error:            # noqa: BLE001
+            logger.warning("Server xatolarini yuborishda xato: %s", error)
 
         await asyncio.sleep(CHECK_EVERY)

@@ -19,6 +19,7 @@ JOINS_PATH = "/api/telegram/obuna/"
 USERS_PATH = "/api/telegram/foydalanuvchilar/"
 POSTS_PATH = "/api/telegram/postlar/"
 BROADCAST_PATH = "/api/telegram/reklama/"
+ERRORS_PATH = "/api/telegram/xatolar/"
 
 
 def _url(path):
@@ -182,3 +183,15 @@ async def finish_broadcast(broadcast_id, sent, failed, blocked):
         return False, {}
     return await _request('POST', f"{BROADCAST_PATH}{broadcast_id}/natija/",
                           json={'sent': sent, 'failed': failed, 'blocked': blocked})
+
+
+# --------------------------------------------------------------------------
+# Server xatolari
+# --------------------------------------------------------------------------
+
+async def get_errors():
+    """Adminlarga hali yuborilmagan server xatolari: (ro'yxat, panel havolasi)."""
+    ok, payload = await _request('GET', ERRORS_PATH)
+    if not ok:
+        return [], ''
+    return payload.get('results', []), payload.get('panel', '')
