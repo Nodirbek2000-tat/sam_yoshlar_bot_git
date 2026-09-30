@@ -20,6 +20,7 @@ USERS_PATH = "/api/telegram/foydalanuvchilar/"
 POSTS_PATH = "/api/telegram/postlar/"
 BROADCAST_PATH = "/api/telegram/reklama/"
 ERRORS_PATH = "/api/telegram/xatolar/"
+MESSAGES_PATH = "/api/telegram/xabarlar/"
 
 
 def _url(path):
@@ -195,3 +196,18 @@ async def get_errors():
     if not ok:
         return [], ''
     return payload.get('results', []), payload.get('panel', '')
+
+
+# --------------------------------------------------------------------------
+# Shaxsiy xabarlar
+# --------------------------------------------------------------------------
+
+async def get_messages():
+    """Sayt navbatga qo'ygan shaxsiy xabarlar (masalan, startapga investor qiziqdi)."""
+    ok, payload = await _request('GET', MESSAGES_PATH)
+    return payload.get('results', []) if ok else []
+
+
+async def messages_result(results):
+    """Hisobot: `[{'id': 1, 'ok': True, 'error': ''}]`."""
+    return await _request('POST', MESSAGES_PATH + "natija/", json={'results': results})
