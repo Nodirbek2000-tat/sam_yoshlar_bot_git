@@ -36,6 +36,7 @@ EMOJI = {
     'startup': '🚀',
     'business': '💼',
     'peer': '🌍',
+    'poll': '🗳',
 }
 
 logger = logging.getLogger(__name__)
@@ -49,9 +50,16 @@ def caption(post):
     return "\n".join(lines)
 
 
+#: Tugma yozuvi — so'rovnomada odam o'qishga emas, ovoz berishga boradi
+BUTTONS = {
+    'poll': "🗳 Ovoz berish",
+}
+
+
 def keyboard(post):
     markup = InlineKeyboardMarkup()
-    markup.add(InlineKeyboardButton("📖 Davomini o'qish", url=post['link']))
+    markup.add(InlineKeyboardButton(BUTTONS.get(post['kind'], "📖 Davomini o'qish"),
+                                    url=post['link']))
     return markup
 
 
