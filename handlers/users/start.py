@@ -1,7 +1,7 @@
 """Saytga kirish uchun kod berish.
 
 Oqim: majburiy kanallarga obuna → raqam (birinchi marta) → yosh →
-tuman (Samarqand viloyati) → kod.
+tuman (Samarqand viloyati) → mahalla (yangi ro'yxatdan o'tayotganda) → kod.
 Keyingi safar /start bosilsa kod darrov beriladi.
 """
 
@@ -174,6 +174,16 @@ async def remind_district(message: types.Message, state: FSMContext):
     await respond(message.chat.id, ok, response)
 
 
+@dp.message_handler(lambda message: not (message.text or '').startswith('/'),
+                    state=AuthState.waiting_mahalla)
+async def got_mahalla(message: types.Message, state: FSMContext):
+    """Mahalla ro'yxati yo'q — odam o'zi yozadi."""
+    ok, response = await site_api.request_code(**user_fields(message.from_user),
+                                               mahalla=(message.text or '').strip())
+    await state.finish()
+    await respond(message.chat.id, ok, response)
+
+
 @dp.message_handler(state=AuthState.waiting_contact)
 async def remind_contact(message: types.Message):
     await message.answer("Pastdagi tugmani bosing 👇", reply_markup=contact_keyboard())
@@ -225,6 +235,17 @@ async def respond(chat_id, ok: bool, response: dict):
             "Bunday tuman topilmadi. Pastdagi ro'yxatdan tanlang 👇",
             reply_markup=districts_menu(response.get('districts')),
         )
+    elif error == 'need_mahalla':
+        await AuthState.waiting_mahalla.set()
+        await bot.send_message(
+            chat_id,
+            "Zo'r! Oxirgi savol: qaysi <b>mahalladan</b> (MFY) siz? Nomini yozing 👇\n\n"
+            "Masalan: <b>Bog'ishamol MFY</b>",
+            reply_markup=types.ReplyKeyboardRemove(),
+        )
+    elif error == 'bad_mahalla':
+        await AuthState.waiting_mahalla.set()
+        await bot.send_message(chat_id, "Mahalla nomini to'liqroq yozing. Masalan: <b>Bog'ishamol MFY</b>")
     elif error == 'age_limit':
         limit = response.get('limit', 34)
         await AuthState.waiting_age.set()
