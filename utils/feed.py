@@ -1,7 +1,7 @@
 """Saytdagi yangiliklarni obunachilarga yuborish.
 
-Saytga yangi yangilik, e'lon, startap, tadbirkor yoki tengdosh qo'shilsa,
-u navbatga tushadi. Bot har daqiqada navbatni tekshiradi va hammaga
+Saytga yangi yangilik, e'lon, startap, tadbirkor, tengdosh yoki tashkilot
+muammosi qo'shilsa, u navbatga tushadi. Bot har daqiqada navbatni tekshiradi va hammaga
 rasm, matn boshlanishi va «Davomini o'qish» tugmasi bilan yuboradi.
 
 Panelda «Botga yuborish» o'chirilgan bo'lsa — navbatga hech narsa
@@ -37,6 +37,7 @@ EMOJI = {
     'business': '💼',
     'peer': '🌍',
     'poll': '🗳',
+    'problem': '🏢',
 }
 
 logger = logging.getLogger(__name__)
@@ -53,6 +54,8 @@ def caption(post):
 #: Tugma yozuvi — so'rovnomada odam o'qishga emas, ovoz berishga boradi
 BUTTONS = {
     'poll': "🗳 Ovoz berish",
+    # Tashkilot muammosi: odam o'z yechimini yozishga boradi
+    'problem': "💡 Yechim taklif qilish",
 }
 
 
