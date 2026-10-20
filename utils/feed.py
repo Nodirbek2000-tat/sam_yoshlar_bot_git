@@ -38,6 +38,7 @@ EMOJI = {
     'peer': '🌍',
     'poll': '🗳',
     'problem': '🏢',
+    'funded': '💰',
 }
 
 logger = logging.getLogger(__name__)
@@ -56,6 +57,8 @@ BUTTONS = {
     'poll': "🗳 Ovoz berish",
     # Tashkilot muammosi: odam o'z yechimini yozishga boradi
     'problem': "💡 Yechim taklif qilish",
+    # Mablag' olgan startap: saytda o'sha startapning oynasi ochiladi
+    'funded': "💰 Batafsil ko'rish",
 }
 
 
